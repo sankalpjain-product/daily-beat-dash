@@ -2,95 +2,107 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Beat Planning App - Enterprise Mobile-First Design System */
+/* Yellow/Black theme matching existing app style */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core brand colors - Golden Yellow theme */
+    --background: 48 100% 50%;
+    --foreground: 0 0% 10%;
 
+    /* Cards with white background */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 10%;
 
+    /* Popover matches card */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Black for headers/buttons */
+    --primary: 0 0% 10%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Golden Yellow */
+    --secondary: 48 100% 50%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted surfaces */
+    --muted: 48 50% 90%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Slightly darker gold */
+    --accent: 45 100% 45%;
+    --accent-foreground: 0 0% 10%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Status colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 10%;
+    
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders - Yellow tinted */
+    --border: 48 100% 40%;
+    --input: 48 60% 80%;
+    --ring: 0 0% 10%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar - Black theme */
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 48 100% 50%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 48 100% 50%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 48 100% 50%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 45 100% 45%;
+    --accent-foreground: 0 0% 10%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 48 100% 50%;
+
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 48 100% 50%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 48 100% 50%;
   }
 }
 
@@ -101,5 +113,142 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Custom scrollbar for mobile feel */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /* App Header - Black with white text */
+  .app-header {
+    @apply bg-primary text-primary-foreground px-4 py-3;
+  }
+
+  /* Menu Card - White with yellow border */
+  .menu-card {
+    @apply bg-card border-2 border-border rounded-lg p-4 text-card-foreground;
+    @apply hover:bg-muted transition-colors cursor-pointer;
+  }
+
+  /* Status Badges */
+  .badge-draft {
+    @apply bg-muted text-muted-foreground;
+  }
+
+  .badge-pending {
+    @apply bg-warning text-warning-foreground;
+  }
+
+  .badge-approved {
+    @apply bg-success text-success-foreground;
+  }
+
+  .badge-sent-back {
+    @apply bg-destructive text-destructive-foreground;
+  }
+
+  /* Day Card */
+  .day-card {
+    @apply bg-card border-2 border-border rounded-lg overflow-hidden;
+  }
+
+  .day-card-header {
+    @apply bg-primary text-primary-foreground px-3 py-2 font-medium;
+  }
+
+  .day-card-content {
+    @apply p-3 space-y-2;
+  }
+
+  /* Bottom Navigation */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-primary border-t border-border;
+    @apply flex items-center justify-around py-2 px-4;
+    @apply safe-area-inset-bottom;
+  }
+
+  .bottom-nav-item {
+    @apply flex flex-col items-center gap-1 text-primary-foreground/70;
+    @apply hover:text-primary-foreground transition-colors;
+  }
+
+  .bottom-nav-item.active {
+    @apply text-secondary;
+  }
+
+  /* Form inputs styled for mobile */
+  .mobile-input {
+    @apply w-full bg-card border-2 border-border rounded-lg px-3 py-2;
+    @apply focus:border-primary focus:outline-none;
+  }
+
+  .mobile-select {
+    @apply w-full bg-card border-2 border-border rounded-lg px-3 py-2;
+    @apply appearance-none cursor-pointer;
+  }
+
+  /* Action buttons */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium;
+    @apply hover:opacity-90 transition-opacity active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-medium;
+    @apply border-2 border-primary hover:bg-accent transition-colors active:scale-95;
+  }
+
+  .btn-outline {
+    @apply bg-transparent text-primary border-2 border-primary px-4 py-2 rounded-lg font-medium;
+    @apply hover:bg-primary hover:text-primary-foreground transition-colors active:scale-95;
+  }
+
+  /* Chip/Tag styles */
+  .chip {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+    @apply bg-muted text-muted-foreground;
+  }
+
+  .chip-selected {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  /* Android-style status bar area */
+  .status-bar {
+    @apply bg-primary h-6;
+  }
+}
+
+@layer utilities {
+  /* Safe area for mobile devices */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* Gradient utilities */
+  .gradient-header {
+    background: linear-gradient(180deg, hsl(0 0% 10%) 0%, hsl(0 0% 15%) 100%);
+  }
+
+  /* Touch feedback */
+  .touch-feedback {
+    @apply active:opacity-70 transition-opacity;
   }
 }
