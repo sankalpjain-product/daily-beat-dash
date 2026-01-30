@@ -48,21 +48,39 @@ export interface Cluster {
   name: string;
 }
 
-export interface DayPlan {
-  id: string;
-  dayOfWeek: number; // 0 = Monday, 5 = Saturday
-  date: string;
-  clusters: Cluster[];
-  agents: Agent[];
-  purposes: VisitPurpose[];
-  timeSlots: TimeSlot[];
-  checkIn?: CheckIn;
+export interface GPSCoordinates {
+  latitude: number;
+  longitude: number;
 }
 
 export interface CheckIn {
   timestamp: string;
   photoUrl: string;
+  location?: GPSCoordinates;
   notes?: string;
+}
+
+// A single visit within a day - can have multiple visits per day
+export interface Visit {
+  id: string;
+  cluster?: Cluster;
+  agents: Agent[];
+  purposes: VisitPurpose[];
+  timeSlot?: TimeSlot;
+  checkIn?: CheckIn;
+}
+
+export interface DayPlan {
+  id: string;
+  dayOfWeek: number; // 0 = Monday, 5 = Saturday
+  date: string;
+  visits: Visit[];
+  // Legacy support - still keeping top-level fields for backward compatibility
+  clusters: Cluster[];
+  agents: Agent[];
+  purposes: VisitPurpose[];
+  timeSlots: TimeSlot[];
+  checkIn?: CheckIn;
 }
 
 export interface Comment {

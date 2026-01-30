@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, WeeklyPlan, UserRole, Comment, DayPlan, MOCK_CLUSTERS, MOCK_AGENTS, DAYS_OF_WEEK } from '@/types/beatPlan';
+import { User, WeeklyPlan, UserRole, Comment, DayPlan, MOCK_CLUSTERS, MOCK_AGENTS, DAYS_OF_WEEK, Visit, GPSCoordinates } from '@/types/beatPlan';
 import { addDays, startOfWeek, format } from 'date-fns';
 
 interface AppContextType {
@@ -14,7 +14,10 @@ interface AppContextType {
   approvePlan: (planId: string) => void;
   sendBackPlan: (planId: string, comment: string) => void;
   addComment: (planId: string, content: string, dayId?: string) => void;
-  addCheckIn: (dayId: string, photoUrl: string, notes?: string) => void;
+  addCheckIn: (dayId: string, visitId: string, photoUrl: string, location?: GPSCoordinates, notes?: string) => void;
+  addVisitToDay: (dayId: string, visit: Visit) => void;
+  updateVisit: (dayId: string, visit: Visit) => void;
+  deleteVisit: (dayId: string, visitId: string) => void;
 }
 
 const ATD_USER: User = {
@@ -54,6 +57,7 @@ function createEmptyPlan(user: User): WeeklyPlan {
       id: `day_${dayOfWeek}_${Date.now()}`,
       dayOfWeek,
       date,
+      visits: [],
       clusters: [],
       agents: [],
       purposes: [],
@@ -79,7 +83,23 @@ function createSamplePlan(user: User): WeeklyPlan {
       id: `day_${dayOfWeek}_sample`,
       dayOfWeek,
       date,
-      clusters: dayOfWeek < 3 ? [MOCK_CLUSTERS[dayOfWeek]] : [MOCK_CLUSTERS[dayOfWeek % MOCK_CLUSTERS.length]],
+      visits: [
+        {
+          id: `visit_${dayOfWeek}_1`,
+          cluster: MOCK_CLUSTERS[dayOfWeek % MOCK_CLUSTERS.length],
+          agents: [MOCK_AGENTS[dayOfWeek], MOCK_AGENTS[(dayOfWeek + 1) % MOCK_AGENTS.length]],
+          purposes: ['sales_support', 'stock_check'] as any,
+          timeSlot: { start: '10:00', end: '13:00' },
+        },
+        {
+          id: `visit_${dayOfWeek}_2`,
+          cluster: MOCK_CLUSTERS[(dayOfWeek + 1) % MOCK_CLUSTERS.length],
+          agents: [MOCK_AGENTS[(dayOfWeek + 2) % MOCK_AGENTS.length]],
+          purposes: ['collection_followup'] as any,
+          timeSlot: { start: '14:00', end: '17:00' },
+        },
+      ],
+      clusters: [MOCK_CLUSTERS[dayOfWeek % MOCK_CLUSTERS.length]],
       agents: [MOCK_AGENTS[dayOfWeek], MOCK_AGENTS[(dayOfWeek + 1) % MOCK_AGENTS.length]],
       purposes: ['sales_support', 'stock_check'] as any,
       timeSlots: [{ start: '10:00', end: '13:00' }, { start: '14:00', end: '17:00' }],
@@ -190,24 +210,95 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const addCheckIn = (dayId: string, photoUrl: string, notes?: string) => {
+  const addCheckIn = (dayId: string, visitId: string, photoUrl: string, location?: GPSCoordinates, notes?: string) => {
+    const planToUpdate = currentPlan || weeklyPlans.find(p => p.status === 'approved');
+    if (!planToUpdate) return;
+    
+    const updatedPlan = {
+      ...planToUpdate,
+      days: planToUpdate.days.map(day =>
+        day.id === dayId
+          ? {
+              ...day,
+              visits: day.visits.map(visit =>
+                visit.id === visitId
+                  ? {
+                      ...visit,
+                      checkIn: {
+                        timestamp: new Date().toISOString(),
+                        photoUrl,
+                        location,
+                        notes,
+                      },
+                    }
+                  : visit
+              ),
+            }
+          : day
+      ),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    if (currentPlan) {
+      setCurrentPlan(updatedPlan);
+    }
+    setWeeklyPlans(plans =>
+      plans.map(p => p.id === updatedPlan.id ? updatedPlan : p)
+    );
+  };
+
+  const addVisitToDay = (dayId: string, visit: Visit) => {
     if (!currentPlan) return;
     
     const updatedPlan = {
       ...currentPlan,
       days: currentPlan.days.map(day =>
         day.id === dayId
-          ? {
-              ...day,
-              checkIn: {
-                timestamp: new Date().toISOString(),
-                photoUrl,
-                notes,
-              },
-            }
+          ? { ...day, visits: [...day.visits, visit] }
           : day
       ),
       updatedAt: new Date().toISOString(),
+      status: currentPlan.status === 'approved' ? 're_approval_required' as const : currentPlan.status,
+    };
+    
+    setCurrentPlan(updatedPlan);
+    setWeeklyPlans(plans =>
+      plans.map(p => p.id === updatedPlan.id ? updatedPlan : p)
+    );
+  };
+
+  const updateVisit = (dayId: string, visit: Visit) => {
+    if (!currentPlan) return;
+    
+    const updatedPlan = {
+      ...currentPlan,
+      days: currentPlan.days.map(day =>
+        day.id === dayId
+          ? { ...day, visits: day.visits.map(v => v.id === visit.id ? visit : v) }
+          : day
+      ),
+      updatedAt: new Date().toISOString(),
+      status: currentPlan.status === 'approved' ? 're_approval_required' as const : currentPlan.status,
+    };
+    
+    setCurrentPlan(updatedPlan);
+    setWeeklyPlans(plans =>
+      plans.map(p => p.id === updatedPlan.id ? updatedPlan : p)
+    );
+  };
+
+  const deleteVisit = (dayId: string, visitId: string) => {
+    if (!currentPlan) return;
+    
+    const updatedPlan = {
+      ...currentPlan,
+      days: currentPlan.days.map(day =>
+        day.id === dayId
+          ? { ...day, visits: day.visits.filter(v => v.id !== visitId) }
+          : day
+      ),
+      updatedAt: new Date().toISOString(),
+      status: currentPlan.status === 'approved' ? 're_approval_required' as const : currentPlan.status,
     };
     
     setCurrentPlan(updatedPlan);
@@ -231,6 +322,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         sendBackPlan,
         addComment,
         addCheckIn,
+        addVisitToDay,
+        updateVisit,
+        deleteVisit,
       }}
     >
       {children}

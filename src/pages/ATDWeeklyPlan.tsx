@@ -6,7 +6,7 @@ import { StatusBadge } from '@/components/common/StatusBadge';
 import { useApp } from '@/contexts/AppContext';
 import { DayPlan, DAYS_OF_WEEK } from '@/types/beatPlan';
 import { format, parseISO } from 'date-fns';
-import { ChevronRight, Plus, Send } from 'lucide-react';
+import { ChevronRight, Plus, Send, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function ATDWeeklyPlan() {
@@ -36,12 +36,18 @@ export default function ATDWeeklyPlan() {
     submitPlan();
   };
 
-  const canSubmit = displayPlan?.days.some(d => d.clusters.length > 0) && 
+  const totalVisits = displayPlan?.days.reduce((sum, d) => sum + d.visits.length, 0) || 0;
+  const canSubmit = totalVisits > 0 && 
     (displayPlan?.status === 'draft' || displayPlan?.status === 'sent_back');
 
   const weekRange = displayPlan ? 
     `${format(parseISO(displayPlan.weekStartDate), 'dd MMM')} - ${format(parseISO(displayPlan.days[5].date), 'dd MMM yyyy')}` :
     '';
+
+  // Get the last RBM comment if sent back
+  const lastRbmComment = displayPlan?.status === 'sent_back' 
+    ? displayPlan.comments.filter(c => c.authorRole === 'rbm').pop()
+    : null;
 
   return (
     <MobileLayout title="Beat Planning" showBack>
@@ -55,6 +61,9 @@ export default function ATDWeeklyPlan() {
             </div>
             <p className="text-sm text-muted-foreground">{weekRange}</p>
             <p className="text-sm text-muted-foreground">HQ: {displayPlan.hq}</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {totalVisits} visit{totalVisits !== 1 ? 's' : ''} planned
+            </p>
           </div>
         ) : (
           <button
@@ -67,12 +76,27 @@ export default function ATDWeeklyPlan() {
           </button>
         )}
 
-        {/* RBM Feedback */}
-        {displayPlan?.status === 'sent_back' && displayPlan.comments.length > 0 && (
-          <div className="bg-destructive/10 border-2 border-destructive rounded-lg p-3">
-            <p className="text-sm font-medium text-destructive mb-1">RBM Feedback:</p>
-            <p className="text-sm">{displayPlan.comments[displayPlan.comments.length - 1].content}</p>
+        {/* RBM Feedback Banner */}
+        {lastRbmComment && (
+          <div className="bg-destructive/10 border-2 border-destructive rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle size={20} className="text-destructive shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-destructive mb-1">Sent Back by RBM</p>
+                <p className="text-sm">{lastRbmComment.content}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {lastRbmComment.author} • {format(parseISO(lastRbmComment.timestamp), 'dd MMM, hh:mm a')}
+                </p>
+              </div>
+            </div>
           </div>
+        )}
+
+        {/* Editable Hint */}
+        {displayPlan && (displayPlan.status === 'draft' || displayPlan.status === 'sent_back') && (
+          <p className="text-xs text-muted-foreground text-center">
+            Tap any day to add or edit visits
+          </p>
         )}
 
         {/* Day Cards */}
