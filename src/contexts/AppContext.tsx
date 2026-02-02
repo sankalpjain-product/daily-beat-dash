@@ -44,6 +44,14 @@ function getNextWeekDates(): { date: string; dayOfWeek: number }[] {
   }));
 }
 
+function getCurrentWeekDates(): { date: string; dayOfWeek: number }[] {
+  const thisMonday = startOfWeek(new Date(), { weekStartsOn: 1 });
+  return DAYS_OF_WEEK.map((_, index) => ({
+    date: format(addDays(thisMonday, index), 'yyyy-MM-dd'),
+    dayOfWeek: index,
+  }));
+}
+
 function createEmptyPlan(user: User): WeeklyPlan {
   const weekDates = getNextWeekDates();
   return {
@@ -69,16 +77,16 @@ function createEmptyPlan(user: User): WeeklyPlan {
   };
 }
 
-// Sample existing plan for demo
+// Sample existing plan for demo - using current week and approved status for testing check-in
 function createSamplePlan(user: User): WeeklyPlan {
-  const weekDates = getNextWeekDates();
+  const weekDates = getCurrentWeekDates();
   return {
     id: 'plan_sample_1',
     weekStartDate: weekDates[0].date,
     atdId: user.id,
     atdName: user.name,
     hq: user.hq,
-    status: 'pending_approval',
+    status: 'approved',
     days: weekDates.map(({ date, dayOfWeek }) => ({
       id: `day_${dayOfWeek}_sample`,
       dayOfWeek,
