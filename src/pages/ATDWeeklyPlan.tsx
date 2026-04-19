@@ -14,8 +14,14 @@ export default function ATDWeeklyPlan() {
   const { currentPlan, weeklyPlans, createNewPlan, updateDayPlan, submitPlan } = useApp();
   const [editingDay, setEditingDay] = useState<DayPlan | null>(null);
 
-  // Get the plan to display (current draft or existing)
-  const displayPlan = currentPlan || weeklyPlans[0];
+  // Prefer the active draft, then sent_back, then pending, then approved
+  const displayPlan = currentPlan 
+    || weeklyPlans.find(p => p.status === 'draft')
+    || weeklyPlans.find(p => p.status === 'sent_back')
+    || weeklyPlans.find(p => p.status === 'pending_approval')
+    || weeklyPlans[0];
+
+  const hasDraftableplan = displayPlan && (displayPlan.status === 'draft' || displayPlan.status === 'sent_back');
 
   const handleStartNewPlan = () => {
     createNewPlan();
