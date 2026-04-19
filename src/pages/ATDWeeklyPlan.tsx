@@ -58,20 +58,8 @@ export default function ATDWeeklyPlan() {
   return (
     <MobileLayout title="Beat Planning" showBack>
       <div className="p-4 space-y-4">
-        {/* Always-available: Create plan for next week */}
-        {!currentPlan && (
-          <button
-            onClick={handleStartNewPlan}
-            className="w-full bg-card border-2 border-dashed border-primary rounded-lg p-4 text-center touch-feedback"
-          >
-            <Plus size={24} className="mx-auto mb-1 text-primary" />
-            <p className="font-medium text-sm">Create Next Week's Plan</p>
-            <p className="text-xs text-muted-foreground">Plan Mon–Sat in advance</p>
-          </button>
-        )}
-
         {/* Week Header */}
-        {displayPlan && (
+        {displayPlan ? (
           <div className="bg-card border-2 border-border rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-semibold">Weekly Plan</h2>
@@ -83,6 +71,15 @@ export default function ATDWeeklyPlan() {
               {totalVisits} visit{totalVisits !== 1 ? 's' : ''} planned
             </p>
           </div>
+        ) : (
+          <button
+            onClick={handleStartNewPlan}
+            className="w-full bg-card border-2 border-border border-dashed rounded-lg p-6 text-center touch-feedback"
+          >
+            <Plus size={32} className="mx-auto mb-2 text-muted-foreground" />
+            <p className="font-medium">Create Weekly Plan</p>
+            <p className="text-sm text-muted-foreground">Plan for next week (Mon-Sat)</p>
+          </button>
         )}
 
         {/* RBM Feedback Banner */}
