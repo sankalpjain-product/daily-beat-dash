@@ -58,7 +58,7 @@ export default function ATDWeeklyPlan() {
   return (
     <MobileLayout title="Beat Planning" showBack>
       <div className="p-4 space-y-4">
-        {/* Week Header */}
+        {/* Week Header / Create Plan */}
         {displayPlan ? (
           <div className="bg-card border-2 border-border rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
@@ -71,7 +71,10 @@ export default function ATDWeeklyPlan() {
               {totalVisits} visit{totalVisits !== 1 ? 's' : ''} planned
             </p>
           </div>
-        ) : (
+        ) : null}
+
+        {/* Create Next Week Plan Button - always available */}
+        {!currentPlan && (
           <button
             onClick={handleStartNewPlan}
             className="w-full bg-card border-2 border-border border-dashed rounded-lg p-6 text-center touch-feedback"
