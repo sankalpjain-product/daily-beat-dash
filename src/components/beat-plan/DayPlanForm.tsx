@@ -132,7 +132,7 @@ export function DayPlanForm({ day, onSave, onClose }: DayPlanFormProps) {
           visit={editingVisit || undefined}
           onSave={editingVisit ? handleUpdateVisit : handleAddVisit}
           onDelete={editingVisit ? () => handleDeleteVisit(editingVisit.id) : undefined}
-          onClose={() => {
+          onCancel={() => {
             setIsAddingVisit(false);
             setEditingVisit(null);
           }}
