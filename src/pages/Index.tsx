@@ -1,7 +1,7 @@
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Calendar, MapPin, Users, ClipboardCheck, Camera, Settings } from 'lucide-react';
+import { ChevronRight, Calendar, MapPin, Users, ClipboardCheck, Camera, Settings, Activity } from 'lucide-react';
 
 export default function Index() {
   const navigate = useNavigate();
@@ -28,6 +28,12 @@ export default function Index() {
       icon: ClipboardCheck, 
       path: '/rbm/review',
       description: 'Approve ATD beat plans'
+    },
+    {
+      label: 'Team Check-ins',
+      icon: Activity,
+      path: '/rbm/check-ins',
+      description: 'Monitor done & missed visits',
     },
   ];
 
@@ -76,7 +82,7 @@ export default function Index() {
                   : 'bg-card border-2 border-border text-foreground'
               }`}
             >
-              RBM View
+              Phone Sales Manager View
             </button>
           </div>
         </div>

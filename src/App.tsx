@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import ATDWeeklyPlan from "./pages/ATDWeeklyPlan";
 import ATDCheckIn from "./pages/ATDCheckIn";
 import RBMReview from "./pages/RBMReview";
+import RBMCheckIns from "./pages/RBMCheckIns";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/atd/weekly-plan" element={<ATDWeeklyPlan />} />
             <Route path="/atd/check-in" element={<ATDCheckIn />} />
             <Route path="/rbm/review" element={<RBMReview />} />
+            <Route path="/rbm/check-ins" element={<RBMCheckIns />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
