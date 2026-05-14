@@ -172,22 +172,6 @@ export function DayCard({
             />
           ))}
 
-          {/* Inline edit form */}
-          {editingVisit && (
-            <VisitForm
-              visit={editingVisit}
-              onSave={(v) => {
-                onUpdateVisit?.(v);
-                setEditingVisit(null);
-              }}
-              onDelete={() => {
-                onDeleteVisit?.(editingVisit.id);
-                setEditingVisit(null);
-              }}
-              onCancel={() => setEditingVisit(null)}
-            />
-          )}
-
           {/* Add Visit */}
           {!addingVisit && !editingVisit && (
             <button
@@ -199,24 +183,58 @@ export function DayCard({
             </button>
           )}
 
-          {/* Inline add form */}
-          {addingVisit && (
-            <VisitForm
-              onSave={(v) => {
-                onAddVisit?.(v);
-                setAddingVisit(false);
-              }}
-              onCancel={() => setAddingVisit(false)}
-            />
-          )}
-
-          {isEmpty && !addingVisit && (
+          {isEmpty && !addingVisit && !editingVisit && (
             <p className="text-center text-sm text-muted-foreground py-2">
               No visits planned for this day
             </p>
           )}
         </div>
       )}
+
+      {/* Add / Edit dialog */}
+      <Dialog
+        open={addingVisit || !!editingVisit}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAddingVisit(false);
+            setEditingVisit(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingVisit ? `Edit Visit – ${dayName}` : `Add Visit – ${dayName}`}
+            </DialogTitle>
+          </DialogHeader>
+          {(addingVisit || editingVisit) && (
+            <VisitForm
+              visit={editingVisit || undefined}
+              onSave={(v) => {
+                if (editingVisit) {
+                  onUpdateVisit?.(v);
+                  setEditingVisit(null);
+                } else {
+                  onAddVisit?.(v);
+                  setAddingVisit(false);
+                }
+              }}
+              onDelete={
+                editingVisit
+                  ? () => {
+                      onDeleteVisit?.(editingVisit.id);
+                      setEditingVisit(null);
+                    }
+                  : undefined
+              }
+              onCancel={() => {
+                setAddingVisit(false);
+                setEditingVisit(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
