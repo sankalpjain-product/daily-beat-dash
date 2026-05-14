@@ -152,7 +152,38 @@ const MOCK_ATDS = [
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User>(ATD_USER);
-  const [weeklyPlans, setWeeklyPlans] = useState<WeeklyPlan[]>([createSamplePlan(ATD_USER)]);
+  const [weeklyPlans, setWeeklyPlans] = useState<WeeklyPlan[]>([
+    createSamplePlan(MOCK_ATDS[0], {
+      checkInPattern: [
+        ['done', 'done'],
+        ['done', 'missed'],
+        ['done', 'done'],
+        ['missed', 'missed'],
+        ['pending', 'pending'],
+        ['pending', 'pending'],
+      ],
+    }),
+    createSamplePlan(MOCK_ATDS[1], {
+      checkInPattern: [
+        ['done', 'missed'],
+        ['done', 'done'],
+        ['missed', 'done'],
+        ['done', 'done'],
+        ['pending', 'pending'],
+        ['pending', 'pending'],
+      ],
+    }),
+    createSamplePlan(MOCK_ATDS[2], {
+      checkInPattern: [
+        ['missed', 'missed'],
+        ['done', 'missed'],
+        ['done', 'done'],
+        ['done', 'done'],
+        ['pending', 'pending'],
+        ['pending', 'pending'],
+      ],
+    }),
+  ]);
   const [currentPlan, setCurrentPlan] = useState<WeeklyPlan | null>(null);
 
   const switchRole = (role: UserRole) => {
