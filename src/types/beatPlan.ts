@@ -68,6 +68,7 @@ export interface Visit {
   cluster?: Cluster;
   agents: Agent[];
   purposes: VisitPurpose[];
+  otherPurposeText?: string;
   timeSlot?: TimeSlot;
   checkIn?: CheckIn;
 }
