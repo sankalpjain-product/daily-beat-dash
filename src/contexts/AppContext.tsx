@@ -78,46 +78,77 @@ function createEmptyPlan(user: User): WeeklyPlan {
 }
 
 // Sample existing plan for demo - using current week and approved status for testing check-in
-function createSamplePlan(user: User): WeeklyPlan {
+function createSamplePlan(
+  user: { id: string; name: string; hq: string },
+  opts?: { planIdSuffix?: string; checkInPattern?: ('done' | 'missed' | 'pending')[][] }
+): WeeklyPlan {
   const weekDates = getCurrentWeekDates();
+  const suffix = opts?.planIdSuffix || 'sample_1';
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+
   return {
-    id: 'plan_sample_1',
+    id: `plan_${user.id}_${suffix}`,
     weekStartDate: weekDates[0].date,
     atdId: user.id,
     atdName: user.name,
     hq: user.hq,
     status: 'approved',
-    days: weekDates.map(({ date, dayOfWeek }) => ({
-      id: `day_${dayOfWeek}_sample`,
-      dayOfWeek,
-      date,
-      visits: [
+    days: weekDates.map(({ date, dayOfWeek }) => {
+      const visits: Visit[] = [
         {
-          id: `visit_${dayOfWeek}_1`,
+          id: `visit_${user.id}_${dayOfWeek}_1`,
           cluster: MOCK_CLUSTERS[dayOfWeek % MOCK_CLUSTERS.length],
           agents: [MOCK_AGENTS[dayOfWeek], MOCK_AGENTS[(dayOfWeek + 1) % MOCK_AGENTS.length]],
           purposes: ['sales_support', 'stock_check'] as any,
           timeSlot: { start: '10:00', end: '13:00' },
         },
         {
-          id: `visit_${dayOfWeek}_2`,
+          id: `visit_${user.id}_${dayOfWeek}_2`,
           cluster: MOCK_CLUSTERS[(dayOfWeek + 1) % MOCK_CLUSTERS.length],
           agents: [MOCK_AGENTS[(dayOfWeek + 2) % MOCK_AGENTS.length]],
           purposes: ['collection_followup'] as any,
           timeSlot: { start: '14:00', end: '17:00' },
         },
-      ],
-      clusters: [MOCK_CLUSTERS[dayOfWeek % MOCK_CLUSTERS.length]],
-      agents: [MOCK_AGENTS[dayOfWeek], MOCK_AGENTS[(dayOfWeek + 1) % MOCK_AGENTS.length]],
-      purposes: ['sales_support', 'stock_check'] as any,
-      timeSlots: [{ start: '10:00', end: '13:00' }, { start: '14:00', end: '17:00' }],
-    })),
+      ];
+
+      const pattern = opts?.checkInPattern?.[dayOfWeek];
+      const isPastOrToday = date <= todayStr;
+      if (isPastOrToday && pattern) {
+        visits.forEach((v, i) => {
+          if (pattern[i] === 'done') {
+            v.checkIn = {
+              timestamp: new Date(`${date}T${v.timeSlot!.start}:00`).toISOString(),
+              photoUrl:
+                'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400',
+              location: { latitude: 28.6 + Math.random() * 0.1, longitude: 77.2 + Math.random() * 0.1 },
+            };
+          }
+        });
+      }
+
+      return {
+        id: `day_${user.id}_${dayOfWeek}_${suffix}`,
+        dayOfWeek,
+        date,
+        visits,
+        clusters: [MOCK_CLUSTERS[dayOfWeek % MOCK_CLUSTERS.length]],
+        agents: [MOCK_AGENTS[dayOfWeek], MOCK_AGENTS[(dayOfWeek + 1) % MOCK_AGENTS.length]],
+        purposes: ['sales_support', 'stock_check'] as any,
+        timeSlots: [{ start: '10:00', end: '13:00' }, { start: '14:00', end: '17:00' }],
+      };
+    }),
     comments: [],
     submittedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 }
+
+const MOCK_ATDS = [
+  { id: 'atd1', name: 'Rahul Kumar', hq: 'Delhi North' },
+  { id: 'atd2', name: 'Priya Singh', hq: 'Delhi North' },
+  { id: 'atd3', name: 'Amit Verma', hq: 'Delhi North' },
+];
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User>(ATD_USER);
