@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 
 interface VisitFormProps {
   visit?: Visit;
@@ -34,16 +35,47 @@ interface VisitFormProps {
 }
 
 const TIME_SLOT_OPTIONS = [
-  ...TIME_SLOTS.map((s) => ({ value: `${s.start}-${s.end}`, label: s.label, slot: { start: s.start, end: s.end } })),
+  ...TIME_SLOTS.map((s) => ({ value: `${s.start}-${s.end}`, label: s.label, slot: { start: s.start, end: s.end } as TimeSlot })),
   { value: 'full_day', label: 'Full Day', slot: { start: '09:00', end: '18:00' } as TimeSlot },
   { value: 'custom', label: 'Custom', slot: undefined as TimeSlot | undefined },
 ];
 
+const OTHER_CLUSTER_ID = '__other__';
+
 export function VisitForm({ visit, onSave, onDelete, onCancel }: VisitFormProps) {
-  const [selectedCluster, setSelectedCluster] = useState<Cluster | undefined>(visit?.cluster);
+  const initialIsOtherCluster =
+    !!visit?.cluster && !MOCK_CLUSTERS.find((c) => c.id === visit.cluster!.id);
+
+  const [selectedCluster, setSelectedCluster] = useState<Cluster | undefined>(
+    initialIsOtherCluster ? undefined : visit?.cluster
+  );
+  const [isOtherCluster, setIsOtherCluster] = useState(initialIsOtherCluster);
+  const [otherClusterText, setOtherClusterText] = useState(
+    initialIsOtherCluster ? visit!.cluster!.name : ''
+  );
+
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>(visit?.agents || []);
   const [selectedPurposes, setSelectedPurposes] = useState<VisitPurpose[]>(visit?.purposes || []);
+  const [otherPurposeText, setOtherPurposeText] = useState(visit?.otherPurposeText || '');
+
+  const initialTimeMatchesPreset = visit?.timeSlot
+    ? TIME_SLOT_OPTIONS.some(
+        (o) =>
+          o.slot &&
+          o.slot.start === visit.timeSlot!.start &&
+          o.slot.end === visit.timeSlot!.end
+      )
+    : true;
+
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | undefined>(visit?.timeSlot);
+  const [isCustomTime, setIsCustomTime] = useState(!!visit?.timeSlot && !initialTimeMatchesPreset);
+  const [customStart, setCustomStart] = useState(
+    !initialTimeMatchesPreset && visit?.timeSlot ? visit.timeSlot.start : '09:00'
+  );
+  const [customEnd, setCustomEnd] = useState(
+    !initialTimeMatchesPreset && visit?.timeSlot ? visit.timeSlot.end : '18:00'
+  );
+
   const [notes, setNotes] = useState('');
   const [agentsOpen, setAgentsOpen] = useState(false);
 
@@ -64,18 +96,31 @@ export function VisitForm({ visit, onSave, onDelete, onCancel }: VisitFormProps)
   };
 
   const handleSave = () => {
+    const finalCluster: Cluster | undefined = isOtherCluster
+      ? otherClusterText.trim()
+        ? { id: `cluster_other_${Date.now()}`, name: otherClusterText.trim() }
+        : undefined
+      : selectedCluster;
+
+    const finalTimeSlot: TimeSlot | undefined = isCustomTime
+      ? { start: customStart, end: customEnd }
+      : selectedTimeSlot;
+
     const newVisit: Visit = {
       id: visit?.id || `visit_${Date.now()}`,
-      cluster: selectedCluster,
+      cluster: finalCluster,
       agents: selectedAgents,
       purposes: selectedPurposes,
-      timeSlot: selectedTimeSlot,
+      timeSlot: finalTimeSlot,
       checkIn: visit?.checkIn,
+      otherPurposeText: selectedPurposes.includes('other') ? otherPurposeText.trim() : undefined,
     };
     onSave(newVisit, notes);
   };
 
-  const canSave = selectedAgents.length > 0 || !!selectedCluster;
+  const canSave =
+    (selectedAgents.length > 0 || !!selectedCluster || (isOtherCluster && otherClusterText.trim())) &&
+    (!selectedPurposes.includes('other') || otherPurposeText.trim().length > 0);
 
   const agentsLabel =
     selectedAgents.length === 0
@@ -84,20 +129,30 @@ export function VisitForm({ visit, onSave, onDelete, onCancel }: VisitFormProps)
       ? selectedAgents[0].name
       : `${selectedAgents.length} agents selected`;
 
-  const timeSlotValue = selectedTimeSlot
+  const clusterValue = isOtherCluster ? OTHER_CLUSTER_ID : selectedCluster?.id || '';
+
+  const timeSlotValue = isCustomTime
+    ? 'custom'
+    : selectedTimeSlot
     ? `${selectedTimeSlot.start}-${selectedTimeSlot.end}`
     : '';
 
   return (
-    <div className="bg-card rounded-lg border-2 border-border p-4 space-y-4 animate-fade-in">
+    <div className="space-y-4">
       {/* Route / Cluster */}
       <div className="space-y-1.5">
         <label className="text-sm font-medium text-foreground">Route / Cluster</label>
         <Select
-          value={selectedCluster?.id || ''}
-          onValueChange={(id) =>
-            setSelectedCluster(MOCK_CLUSTERS.find((c) => c.id === id))
-          }
+          value={clusterValue}
+          onValueChange={(id) => {
+            if (id === OTHER_CLUSTER_ID) {
+              setIsOtherCluster(true);
+              setSelectedCluster(undefined);
+            } else {
+              setIsOtherCluster(false);
+              setSelectedCluster(MOCK_CLUSTERS.find((c) => c.id === id));
+            }
+          }}
         >
           <SelectTrigger className="bg-card">
             <SelectValue placeholder="Select cluster" />
@@ -108,8 +163,17 @@ export function VisitForm({ visit, onSave, onDelete, onCancel }: VisitFormProps)
                 {c.name}
               </SelectItem>
             ))}
+            <SelectItem value={OTHER_CLUSTER_ID}>Other…</SelectItem>
           </SelectContent>
         </Select>
+        {isOtherCluster && (
+          <Input
+            value={otherClusterText}
+            onChange={(e) => setOtherClusterText(e.target.value)}
+            placeholder="Enter cluster / route name"
+            className="bg-card"
+          />
+        )}
         <p className="text-xs text-muted-foreground">
           Select the primary area you will cover
         </p>
@@ -179,6 +243,14 @@ export function VisitForm({ visit, onSave, onDelete, onCancel }: VisitFormProps)
             );
           })}
         </div>
+        {selectedPurposes.includes('other') && (
+          <Input
+            value={otherPurposeText}
+            onChange={(e) => setOtherPurposeText(e.target.value)}
+            placeholder="Specify other purpose"
+            className="bg-card mt-1"
+          />
+        )}
       </div>
 
       {/* Time Slot */}
@@ -187,8 +259,14 @@ export function VisitForm({ visit, onSave, onDelete, onCancel }: VisitFormProps)
         <Select
           value={timeSlotValue}
           onValueChange={(v) => {
-            const opt = TIME_SLOT_OPTIONS.find((o) => o.value === v);
-            setSelectedTimeSlot(opt?.slot);
+            if (v === 'custom') {
+              setIsCustomTime(true);
+              setSelectedTimeSlot(undefined);
+            } else {
+              setIsCustomTime(false);
+              const opt = TIME_SLOT_OPTIONS.find((o) => o.value === v);
+              setSelectedTimeSlot(opt?.slot);
+            }
           }}
         >
           <SelectTrigger className="bg-card">
@@ -202,6 +280,28 @@ export function VisitForm({ visit, onSave, onDelete, onCancel }: VisitFormProps)
             ))}
           </SelectContent>
         </Select>
+        {isCustomTime && (
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <div>
+              <label className="text-xs text-muted-foreground">Start</label>
+              <Input
+                type="time"
+                value={customStart}
+                onChange={(e) => setCustomStart(e.target.value)}
+                className="bg-card"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">End</label>
+              <Input
+                type="time"
+                value={customEnd}
+                onChange={(e) => setCustomEnd(e.target.value)}
+                className="bg-card"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Notes */}

@@ -13,7 +13,8 @@ export type VisitPurpose =
   | 'stock_check'
   | 'recruitment'
   | 'table_meeting'
-  | 'issue_resolution';
+  | 'issue_resolution'
+  | 'other';
 
 export const VISIT_PURPOSE_LABELS: Record<VisitPurpose, string> = {
   sales_support: 'Sales Support',
@@ -22,6 +23,7 @@ export const VISIT_PURPOSE_LABELS: Record<VisitPurpose, string> = {
   recruitment: 'Recruitment',
   table_meeting: 'Table Meeting',
   issue_resolution: 'Issue Resolution',
+  other: 'Other',
 };
 
 export const STATUS_LABELS: Record<PlanStatus, string> = {
@@ -66,6 +68,7 @@ export interface Visit {
   cluster?: Cluster;
   agents: Agent[];
   purposes: VisitPurpose[];
+  otherPurposeText?: string;
   timeSlot?: TimeSlot;
   checkIn?: CheckIn;
 }
