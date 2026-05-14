@@ -3,6 +3,12 @@ import { DayPlan, DAYS_OF_WEEK, VISIT_PURPOSE_LABELS, Visit } from '@/types/beat
 import { format, parseISO } from 'date-fns';
 import { MapPin, Users, Clock, CheckCircle, Plus, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
 import { VisitForm } from './VisitForm';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface DayCardProps {
   day: DayPlan;
