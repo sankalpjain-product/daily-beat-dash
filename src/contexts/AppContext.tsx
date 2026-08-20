@@ -14,7 +14,7 @@ interface AppContextType {
   approvePlan: (planId: string) => void;
   sendBackPlan: (planId: string, comment: string) => void;
   addComment: (planId: string, content: string, dayId?: string) => void;
-  addCheckIn: (dayId: string, visitId: string, photoUrl: string, location?: GPSCoordinates, notes?: string) => void;
+  addCheckIn: (dayId: string, visitId: string, photoUrl: string, metAgentIds: string[], location?: GPSCoordinates, notes?: string) => void;
   addVisitToDay: (dayId: string, visit: Visit) => void;
   updateVisit: (dayId: string, visit: Visit) => void;
   deleteVisit: (dayId: string, visitId: string) => void;
@@ -280,7 +280,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const addCheckIn = (dayId: string, visitId: string, photoUrl: string, location?: GPSCoordinates, notes?: string) => {
+  const addCheckIn = (dayId: string, visitId: string, photoUrl: string, metAgentIds: string[], location?: GPSCoordinates, notes?: string) => {
     const planToUpdate = currentPlan || weeklyPlans.find(p => p.status === 'approved');
     if (!planToUpdate) return;
     
@@ -299,6 +299,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                         photoUrl,
                         location,
                         notes,
+                        metAgentIds,
                       },
                     }
                   : visit
