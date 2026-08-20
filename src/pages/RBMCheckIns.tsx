@@ -134,9 +134,39 @@ function DayBreakdown({ day }: { day: DayPlan }) {
                   </div>
                 )}
                 {visit.agents.length > 0 && (
-                  <div className="flex items-start gap-1.5 text-xs">
-                    <Users size={12} className="text-muted-foreground mt-0.5 shrink-0" />
-                    <span>{visit.agents.map((a) => a.name).join(', ')}</span>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <Users size={12} className="text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground">
+                        Retailers scheduled: {visit.agents.length}
+                        {visit.checkIn?.metAgentIds && (
+                          <> · attended {visit.agents.filter((a) => visit.checkIn!.metAgentIds!.includes(a.id)).length}</>
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {visit.agents.map((a) => {
+                        const met = visit.checkIn?.metAgentIds?.includes(a.id);
+                        const cls = !visit.checkIn
+                          ? 'bg-muted text-muted-foreground'
+                          : met
+                            ? 'bg-success/15 text-success'
+                            : 'bg-destructive/15 text-destructive';
+                        return (
+                          <span
+                            key={a.id}
+                            className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${cls}`}
+                          >
+                            {visit.checkIn ? (
+                              met ? <CheckCircle size={10} /> : <XCircle size={10} />
+                            ) : (
+                              <Clock size={10} />
+                            )}
+                            {a.name}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
                 {visit.timeSlot && (
@@ -167,11 +197,16 @@ function DayBreakdown({ day }: { day: DayPlan }) {
                       <p>Checked in {format(parseISO(visit.checkIn.timestamp), 'hh:mm a')}</p>
                       {visit.checkIn.metAgentIds && visit.agents.length > 0 && (
                         <p>
-                          Met {visit.checkIn.metAgentIds.length}/{visit.agents.length}:{' '}
-                          {visit.agents
-                            .filter((a) => visit.checkIn!.metAgentIds!.includes(a.id))
-                            .map((a) => a.name)
-                            .join(', ') || 'none'}
+                          Attendance {visit.checkIn.metAgentIds.length}/{visit.agents.length}
+                          {visit.agents.filter((a) => !visit.checkIn!.metAgentIds!.includes(a.id)).length > 0 && (
+                            <>
+                              {' '}· missed:{' '}
+                              {visit.agents
+                                .filter((a) => !visit.checkIn!.metAgentIds!.includes(a.id))
+                                .map((a) => a.name)
+                                .join(', ')}
+                            </>
+                          )}
                         </p>
                       )}
                       {visit.checkIn.location && (
@@ -183,6 +218,7 @@ function DayBreakdown({ day }: { day: DayPlan }) {
                     </div>
                   </div>
                 )}
+
               </div>
             );
           })}
