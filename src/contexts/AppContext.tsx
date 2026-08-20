@@ -121,6 +121,10 @@ function createSamplePlan(
               photoUrl:
                 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400',
               location: { latitude: 28.6 + Math.random() * 0.1, longitude: 77.2 + Math.random() * 0.1 },
+              metAgentIds:
+                v.agents.length > 1 && (dayOfWeek + i) % 3 === 0
+                  ? v.agents.slice(0, v.agents.length - 1).map((a) => a.id)
+                  : v.agents.map((a) => a.id),
             };
           }
         });
