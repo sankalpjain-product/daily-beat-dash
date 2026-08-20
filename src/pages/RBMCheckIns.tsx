@@ -165,6 +165,15 @@ function DayBreakdown({ day }: { day: DayPlan }) {
                     )}
                     <div className="text-[11px] text-muted-foreground">
                       <p>Checked in {format(parseISO(visit.checkIn.timestamp), 'hh:mm a')}</p>
+                      {visit.checkIn.metAgentIds && visit.agents.length > 0 && (
+                        <p>
+                          Met {visit.checkIn.metAgentIds.length}/{visit.agents.length}:{' '}
+                          {visit.agents
+                            .filter((a) => visit.checkIn!.metAgentIds!.includes(a.id))
+                            .map((a) => a.name)
+                            .join(', ') || 'none'}
+                        </p>
+                      )}
                       {visit.checkIn.location && (
                         <p>
                           {visit.checkIn.location.latitude.toFixed(3)},{' '}

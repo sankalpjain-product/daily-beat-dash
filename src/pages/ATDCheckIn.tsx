@@ -18,13 +18,19 @@ export default function ATDCheckIn() {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const todayPlan = approvedPlan?.days.find(d => d.date === todayStr);
 
+  const checkingInAgents = checkingIn
+    ? approvedPlan?.days
+        .find(d => d.id === checkingIn.dayId)
+        ?.visits.find(v => v.id === checkingIn.visitId)?.agents ?? []
+    : [];
+
   const handleCheckIn = (dayId: string, visitId: string) => {
     setCheckingIn({ dayId, visitId });
   };
 
-  const handleCheckInSubmit = (photoUrl: string, location?: GPSCoordinates, notes?: string) => {
+  const handleCheckInSubmit = (photoUrl: string, metAgentIds: string[], location?: GPSCoordinates, notes?: string) => {
     if (checkingIn) {
-      addCheckIn(checkingIn.dayId, checkingIn.visitId, photoUrl, location, notes);
+      addCheckIn(checkingIn.dayId, checkingIn.visitId, photoUrl, metAgentIds, location, notes);
       setCheckingIn(null);
     }
   };
@@ -89,6 +95,15 @@ export default function ATDCheckIn() {
                   <span>
                     {visit.checkIn!.location.latitude.toFixed(4)}, {visit.checkIn!.location.longitude.toFixed(4)}
                   </span>
+                </div>
+              )}
+              {visit.checkIn!.metAgentIds && visit.agents.length > 0 && (
+                <div className="text-xs text-muted-foreground">
+                  Met {visit.checkIn!.metAgentIds.length} of {visit.agents.length}:{' '}
+                  {visit.agents
+                    .filter(a => visit.checkIn!.metAgentIds!.includes(a.id))
+                    .map(a => a.name)
+                    .join(', ') || 'none'}
                 </div>
               )}
               {visit.checkIn!.photoUrl && (
@@ -227,6 +242,7 @@ export default function ATDCheckIn() {
       {/* Check-in Form Modal */}
       {checkingIn && (
         <CheckInForm
+          agents={checkingInAgents}
           onSubmit={handleCheckInSubmit}
           onClose={() => setCheckingIn(null)}
         />

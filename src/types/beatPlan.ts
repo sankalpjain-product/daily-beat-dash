@@ -60,6 +60,7 @@ export interface CheckIn {
   photoUrl: string;
   location?: GPSCoordinates;
   notes?: string;
+  metAgentIds?: string[]; // retailers actually met (attendance)
 }
 
 // A single visit within a day - can have multiple visits per day
