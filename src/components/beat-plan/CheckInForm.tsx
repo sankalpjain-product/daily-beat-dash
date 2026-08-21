@@ -243,6 +243,18 @@ export function CheckInForm({ agents, onSubmit, onClose }: CheckInFormProps) {
             )}
           </div>
 
+          {/* Demo: simulate a spoofed reading */}
+          <button
+            onClick={() => {
+              setLocationError('');
+              setLocation({ latitude: 12, longitude: 77 });
+              setSpoofReason('Mock location provider detected (whole-number coordinates).');
+            }}
+            className="text-xs text-primary underline"
+          >
+            Demo: simulate spoofed location
+          </button>
+
           {/* Spoof warning */}
           {location && spoofReason && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border-2 border-destructive">
@@ -256,6 +268,7 @@ export function CheckInForm({ agents, onSubmit, onClose }: CheckInFormProps) {
               </div>
             </div>
           )}
+
 
           {/* Live Photo */}
           <div className="space-y-2">
