@@ -1,6 +1,44 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Agent, GPSCoordinates } from '@/types/beatPlan';
-import { X, Camera, MapPin, Loader2, RefreshCw, Check } from 'lucide-react';
+import { X, Camera, MapPin, Loader2, RefreshCw, Check, ShieldAlert } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+type LocationTrust = 'verified' | 'suspected_spoof' | 'unavailable';
+
+/** Heuristics for detecting a faked / mock GPS provider on the device. */
+function detectSpoof(position: GeolocationPosition): string | null {
+  const c = position.coords;
+  const anyPos = position as GeolocationPosition & { mocked?: boolean };
+
+  if (anyPos.mocked === true) return 'Device reported a mock location provider.';
+  if (c.accuracy === 0) return 'Reported accuracy of 0 m is not possible on real GPS hardware.';
+  if (
+    c.accuracy <= 5 &&
+    c.altitude === null &&
+    c.speed === null &&
+    c.heading === null
+  ) {
+    return 'Pin-point accuracy with no altitude, speed or heading data — typical of a fake GPS app.';
+  }
+  if (
+    Number.isInteger(c.latitude) && Number.isInteger(c.longitude)
+  ) {
+    return 'Coordinates are exact whole numbers, which indicates a manually set location.';
+  }
+  if (position.timestamp && Math.abs(Date.now() - position.timestamp) > 5 * 60 * 1000) {
+    return 'Location timestamp is stale by more than 5 minutes.';
+  }
+  return null;
+}
 
 interface CheckInFormProps {
   agents: Agent[];
@@ -8,7 +46,9 @@ interface CheckInFormProps {
     photoUrl: string,
     metAgentIds: string[],
     location?: GPSCoordinates,
-    notes?: string
+    notes?: string,
+    locationTrust?: LocationTrust,
+    spoofReason?: string
   ) => void;
   onClose: () => void;
 }
@@ -21,6 +61,8 @@ export function CheckInForm({ agents, onSubmit, onClose }: CheckInFormProps) {
   const [locationError, setLocationError] = useState<string>('');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [cameraError, setCameraError] = useState<string>('');
+  const [spoofReason, setSpoofReason] = useState<string>('');
+  const [showSpoofDialog, setShowSpoofDialog] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -63,6 +105,8 @@ export function CheckInForm({ agents, onSubmit, onClose }: CheckInFormProps) {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        const reason = detectSpoof(position);
+        setSpoofReason(reason ?? '');
         setLocation({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
@@ -122,10 +166,29 @@ export function CheckInForm({ agents, onSubmit, onClose }: CheckInFormProps) {
 
   const canSubmit = !!photoUrl && (agents.length === 0 || metAgentIds.length > 0);
 
+  const submitCheckIn = () => {
+    const trust: LocationTrust = !location
+      ? 'unavailable'
+      : spoofReason
+      ? 'suspected_spoof'
+      : 'verified';
+    onSubmit(
+      photoUrl,
+      metAgentIds,
+      location || undefined,
+      notes || undefined,
+      trust,
+      spoofReason || undefined
+    );
+  };
+
   const handleSubmit = () => {
-    if (canSubmit) {
-      onSubmit(photoUrl, metAgentIds, location || undefined, notes || undefined);
+    if (!canSubmit) return;
+    if (location && spoofReason) {
+      setShowSpoofDialog(true);
+      return;
     }
+    submitCheckIn();
   };
 
   return (
@@ -179,6 +242,20 @@ export function CheckInForm({ agents, onSubmit, onClose }: CheckInFormProps) {
               </>
             )}
           </div>
+
+          {/* Spoof warning */}
+          {location && spoofReason && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border-2 border-destructive">
+              <ShieldAlert size={20} className="text-destructive mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-destructive">Possible location spoofing</p>
+                <p className="text-xs text-muted-foreground">{spoofReason}</p>
+                <button onClick={getLocation} className="text-xs text-primary underline mt-1">
+                  Re-check location
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Live Photo */}
           <div className="space-y-2">
@@ -310,6 +387,32 @@ export function CheckInForm({ agents, onSubmit, onClose }: CheckInFormProps) {
           </button>
         </div>
       </div>
+
+      <AlertDialog open={showSpoofDialog} onOpenChange={setShowSpoofDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldAlert size={18} className="text-destructive" />
+              Location looks spoofed
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {spoofReason} You can still check in, but this visit will be flagged for your Phone
+              Sales Manager to review.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={getLocation}>Re-check location</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowSpoofDialog(false);
+                submitCheckIn();
+              }}
+            >
+              Check in anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

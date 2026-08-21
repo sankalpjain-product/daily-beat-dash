@@ -209,6 +209,12 @@ function DayBreakdown({ day }: { day: DayPlan }) {
                           )}
                         </p>
                       )}
+                      {visit.checkIn.locationTrust === 'suspected_spoof' && (
+                        <p className="text-destructive font-medium">
+                          ⚠ Location possibly spoofed
+                          {visit.checkIn.spoofReason ? ` — ${visit.checkIn.spoofReason}` : ''}
+                        </p>
+                      )}
                       {visit.checkIn.location && (
                         <p>
                           {visit.checkIn.location.latitude.toFixed(3)},{' '}

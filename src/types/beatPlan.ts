@@ -61,6 +61,8 @@ export interface CheckIn {
   location?: GPSCoordinates;
   notes?: string;
   metAgentIds?: string[]; // retailers actually met (attendance)
+  locationTrust?: 'verified' | 'suspected_spoof' | 'unavailable';
+  spoofReason?: string;
 }
 
 // A single visit within a day - can have multiple visits per day
