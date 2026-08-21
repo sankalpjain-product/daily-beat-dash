@@ -4,7 +4,7 @@ import { CheckInForm } from '@/components/beat-plan/CheckInForm';
 import { useApp } from '@/contexts/AppContext';
 import { DayPlan, DAYS_OF_WEEK, Visit, GPSCoordinates, VISIT_PURPOSE_LABELS } from '@/types/beatPlan';
 import { format, parseISO, isToday, isBefore, startOfDay } from 'date-fns';
-import { Camera, CheckCircle, MapPin, Users, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Camera, CheckCircle, MapPin, Users, Clock, ChevronDown, ChevronUp, ShieldAlert } from 'lucide-react';
 
 export default function ATDCheckIn() {
   const { weeklyPlans, addCheckIn } = useApp();
@@ -28,9 +28,16 @@ export default function ATDCheckIn() {
     setCheckingIn({ dayId, visitId });
   };
 
-  const handleCheckInSubmit = (photoUrl: string, metAgentIds: string[], location?: GPSCoordinates, notes?: string) => {
+  const handleCheckInSubmit = (
+    photoUrl: string,
+    metAgentIds: string[],
+    location?: GPSCoordinates,
+    notes?: string,
+    locationTrust?: 'verified' | 'suspected_spoof' | 'unavailable',
+    spoofReason?: string
+  ) => {
     if (checkingIn) {
-      addCheckIn(checkingIn.dayId, checkingIn.visitId, photoUrl, metAgentIds, location, notes);
+      addCheckIn(checkingIn.dayId, checkingIn.visitId, photoUrl, metAgentIds, location, notes, locationTrust, spoofReason);
       setCheckingIn(null);
     }
   };
@@ -95,6 +102,12 @@ export default function ATDCheckIn() {
                   <span>
                     {visit.checkIn!.location.latitude.toFixed(4)}, {visit.checkIn!.location.longitude.toFixed(4)}
                   </span>
+                </div>
+              )}
+              {visit.checkIn!.locationTrust === 'suspected_spoof' && (
+                <div className="flex items-start gap-1 text-xs text-destructive">
+                  <ShieldAlert size={12} className="mt-0.5 shrink-0" />
+                  <span>Location flagged as possibly spoofed{visit.checkIn!.spoofReason ? `: ${visit.checkIn!.spoofReason}` : ''}</span>
                 </div>
               )}
               {visit.checkIn!.metAgentIds && visit.agents.length > 0 && (
