@@ -105,10 +105,9 @@ export default function ATDCheckIn() {
                 </div>
               )}
               {visit.checkIn!.locationTrust === 'suspected_spoof' && (
-                <div className="flex items-start gap-1 text-xs text-destructive">
-                  <ShieldAlert size={12} className="mt-0.5 shrink-0" />
-                  <span>Location flagged as possibly spoofed{visit.checkIn!.spoofReason ? `: ${visit.checkIn!.spoofReason}` : ''}</span>
-                </div>
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-destructive/15 text-destructive">
+                  <ShieldAlert size={11} /> Location unverified
+                </span>
               )}
               {visit.checkIn!.metAgentIds && visit.agents.length > 0 && (
                 <div className="text-xs text-muted-foreground">

@@ -210,10 +210,9 @@ function DayBreakdown({ day }: { day: DayPlan }) {
                         </p>
                       )}
                       {visit.checkIn.locationTrust === 'suspected_spoof' && (
-                        <p className="text-destructive font-medium">
-                          ⚠ Location possibly spoofed
-                          {visit.checkIn.spoofReason ? ` — ${visit.checkIn.spoofReason}` : ''}
-                        </p>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-destructive/15 text-destructive">
+                          <MapPin size={11} /> Location unverified
+                        </span>
                       )}
                       {visit.checkIn.location && (
                         <p>
