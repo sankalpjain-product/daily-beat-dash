@@ -257,15 +257,25 @@ export function CheckInForm({ agents, onSubmit, onClose }: CheckInFormProps) {
 
           {/* Spoof warning */}
           {location && spoofReason && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border-2 border-destructive">
-              <ShieldAlert size={20} className="text-destructive mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-destructive">Possible location spoofing</p>
-                <p className="text-xs text-muted-foreground">{spoofReason}</p>
-                <button onClick={getLocation} className="text-xs text-primary underline mt-1">
-                  Re-check location
-                </button>
+            <div className="space-y-1.5">
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border-2 border-destructive">
+                <ShieldAlert size={20} className="text-destructive mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-destructive">Location couldn't be verified</p>
+                  <p className="text-xs text-muted-foreground">
+                    This device appears to be using a mock or altered location. You can still check
+                    in, but this visit will be recorded as location-unverified and shared with your
+                    PSM for review.
+                  </p>
+                  <button onClick={getLocation} className="text-xs text-primary underline mt-1">
+                    Re-check location
+                  </button>
+                </div>
               </div>
+              <p className="text-xs text-muted-foreground px-1">
+                If you're not using a fake-GPS app, turn off mock locations in your device settings
+                and re-check.
+              </p>
             </div>
           )}
 
@@ -406,11 +416,11 @@ export function CheckInForm({ agents, onSubmit, onClose }: CheckInFormProps) {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <ShieldAlert size={18} className="text-destructive" />
-              Location looks spoofed
+              Location couldn't be verified
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {spoofReason} You can still check in, but this visit will be flagged for your Phone
-              Sales Manager to review.
+              We couldn't verify this device's location. You can still check in, but this visit will
+              be recorded as location-unverified and shared with your PSM for review.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
